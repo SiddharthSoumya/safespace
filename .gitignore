@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+data/*.db
+model_artifacts/*.joblib
+.venv
+env/
+.DS_Store

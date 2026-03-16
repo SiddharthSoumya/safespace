@@ -1,0 +1,24 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: sqlite:///./data/safespace.db
+      ADMIN_TOKEN: dev-admin-token-change-me
+      BACKEND_BASE_URL: http://backend:8000
+    volumes:
+      - ./data:/app/data
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "8501:8501"
+    environment:
+      BACKEND_BASE_URL: http://backend:8000
+    depends_on:
+      - backend

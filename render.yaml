@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: safespace-api
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python scripts/train_model.py
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: safespace-db
+          property: connectionString
+      - key: ADMIN_TOKEN
+        sync: false
+      - key: FERNET_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+
+  - type: web
+    name: safespace-ui
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run frontend/app.py --server.address 0.0.0.0 --server.port $PORT
+    envVars:
+      - key: BACKEND_BASE_URL
+        sync: false
+
+databases:
+  - name: safespace-db
+    plan: free
+    databaseName: safespace
+    user: safespace
