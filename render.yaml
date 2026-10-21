@@ -1,11 +1,15 @@
 services:
   - type: web
     name: safespace-api
-    env: python
+    runtime: python
+    region: oregon
     plan: free
-    buildCommand: pip install -r requirements.txt && python scripts/train_model.py
+    buildCommand: pip install -r requirements.txt
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/v1/health
     envVars:
+      - key: APP_ENV
+        value: production
       - key: DATABASE_URL
         fromDatabase:
           name: safespace-db
@@ -15,20 +19,25 @@ services:
       - key: FERNET_KEY
         sync: false
       - key: CORS_ORIGINS
-        sync: false
+        value: ""
 
   - type: web
     name: safespace-ui
-    env: python
+    runtime: python
+    region: oregon
     plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: streamlit run frontend/app.py --server.address 0.0.0.0 --server.port $PORT
     envVars:
       - key: BACKEND_BASE_URL
-        sync: false
+        fromService:
+          type: web
+          name: safespace-api
+          property: host
 
 databases:
   - name: safespace-db
+    region: oregon
     plan: free
     databaseName: safespace
     user: safespace

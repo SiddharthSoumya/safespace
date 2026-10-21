@@ -2,12 +2,20 @@ from __future__ import annotations
 
 import os
 from typing import Any
+from urllib.parse import quote
 
 import requests
+from dotenv import dotenv_values
 
-BACKEND_BASE_URL = os.getenv("BACKEND_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
+BACKEND_BASE_URL = (
+    os.getenv("BACKEND_BASE_URL")
+    or dotenv_values().get("BACKEND_BASE_URL")
+    or "http://127.0.0.1:8000"
+).strip().rstrip("/")
+if BACKEND_BASE_URL and not BACKEND_BASE_URL.startswith(("http://", "https://")):
+    BACKEND_BASE_URL = f"https://{BACKEND_BASE_URL}"
 API_BASE = f"{BACKEND_BASE_URL}/api/v1"
-TIMEOUT = 20
+TIMEOUT = 90
 
 
 class APIError(Exception):
@@ -39,7 +47,7 @@ def submit_complaint(payload: dict[str, Any]) -> dict[str, Any]:
 
 def lookup_complaint(ticket_id: str, access_code: str) -> dict[str, Any]:
     response = requests.post(
-        f"{API_BASE}/complaints/{ticket_id}/lookup",
+        f"{API_BASE}/complaints/{quote(ticket_id, safe='')}/lookup",
         json={"access_code": access_code},
         timeout=TIMEOUT,
     )
@@ -48,7 +56,7 @@ def lookup_complaint(ticket_id: str, access_code: str) -> dict[str, Any]:
 
 def add_follow_up(ticket_id: str, access_code: str, text: str) -> dict[str, Any]:
     response = requests.post(
-        f"{API_BASE}/complaints/{ticket_id}/messages",
+        f"{API_BASE}/complaints/{quote(ticket_id, safe='')}/messages",
         json={"access_code": access_code, "text": text},
         timeout=TIMEOUT,
     )
@@ -76,7 +84,7 @@ def admin_list_complaints(admin_token: str, params: dict[str, Any] | None = None
 
 def admin_get_complaint(admin_token: str, ticket_id: str) -> dict[str, Any]:
     response = requests.get(
-        f"{API_BASE}/admin/complaints/{ticket_id}",
+        f"{API_BASE}/admin/complaints/{quote(ticket_id, safe='')}",
         headers=admin_headers(admin_token),
         timeout=TIMEOUT,
     )
@@ -85,7 +93,7 @@ def admin_get_complaint(admin_token: str, ticket_id: str) -> dict[str, Any]:
 
 def admin_reply(admin_token: str, ticket_id: str, text: str) -> dict[str, Any]:
     response = requests.post(
-        f"{API_BASE}/admin/complaints/{ticket_id}/messages",
+        f"{API_BASE}/admin/complaints/{quote(ticket_id, safe='')}/messages",
         headers=admin_headers(admin_token),
         json={"text": text},
         timeout=TIMEOUT,
@@ -95,7 +103,7 @@ def admin_reply(admin_token: str, ticket_id: str, text: str) -> dict[str, Any]:
 
 def admin_update_status(admin_token: str, ticket_id: str, status: str) -> dict[str, Any]:
     response = requests.patch(
-        f"{API_BASE}/admin/complaints/{ticket_id}/status",
+        f"{API_BASE}/admin/complaints/{quote(ticket_id, safe='')}/status",
         headers=admin_headers(admin_token),
         json={"status": status},
         timeout=TIMEOUT,

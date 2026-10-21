@@ -1,7 +1,7 @@
 [server]
 headless = true
-enableXsrfProtection = false
-enableCORS = false
+enableXsrfProtection = true
+enableCORS = true
 
 [theme]
 base = "light"

@@ -36,7 +36,7 @@ except ModuleNotFoundError:
 st.set_page_config(page_title="SafeSpace Pro", page_icon="🛡️", layout="wide")
 
 st.title("🛡️ SafeSpace Pro")
-st.caption("Anonymous harassment reporting, secure ticket follow-up, and HR/legal analytics dashboard.")
+st.caption("Workplace incident reporting, ticket follow-up, and an HR/admin review dashboard.")
 
 with st.sidebar:
     st.header("Navigation")
@@ -242,7 +242,7 @@ else:
     st.subheader("About this project")
     st.markdown(
         """
-        **SafeSpace Pro** is a hackathon-friendly but production-structured starter app for anonymous workplace harassment reporting.
+        **SafeSpace Pro** is a starter app for workplace incident reporting and follow-up.
 
         What it includes:
         - FastAPI backend with OpenAPI docs

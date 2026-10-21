@@ -19,25 +19,15 @@ MEDIUM_SEVERITY_TERMS = {
 
 
 @lru_cache(maxsize=1)
-def load_model() -> Any | None:
+def load_model() -> Any:
     model_path = Path(settings.model_path)
     if not model_path.exists():
-        return None
+        raise FileNotFoundError(f"Classifier artifact not found: {model_path}")
     return joblib.load(model_path)
 
 
 def classify_text(text: str) -> tuple[str, float]:
     model = load_model()
-    if model is None:
-        lowered = text.lower()
-        if any(word in lowered for word in {"email", "chat", "dm", "slack", "whatsapp", "message", "online"}):
-            return "digital harassment", 0.70
-        if any(word in lowered for word in {"shout", "yell", "insult", "mock", "verbal", "abuse"}):
-            return "verbal harassment", 0.70
-        if any(word in lowered for word in {"touch", "grab", "hit", "push", "physical"}):
-            return "physical harassment", 0.70
-        return "other", 0.45
-
     probabilities = model.predict_proba([text])[0]
     classes = list(model.classes_)
     best_index = int(probabilities.argmax())

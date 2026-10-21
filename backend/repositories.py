@@ -6,7 +6,14 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
-from backend.core.security import decrypt_text, encrypt_text, generate_access_code, generate_ticket_id, hash_access_code
+from backend.core.security import (
+    decrypt_text,
+    encrypt_text,
+    generate_access_code,
+    generate_ticket_id,
+    hash_access_code,
+    verify_access_code_hash,
+)
 from backend.db.models import Complaint, ComplaintMessage
 from backend.schemas import AnalyticsResponse, ComplaintDetail, ComplaintMessageOut, ComplaintSummary
 from backend.services.classifier import classify_text, infer_severity
@@ -63,7 +70,7 @@ def create_complaint(
 
 
 def verify_access_code(complaint: Complaint, provided_code: str) -> bool:
-    return complaint.access_code_hash == hash_access_code(provided_code.strip())
+    return verify_access_code_hash(complaint.access_code_hash, provided_code)
 
 
 def _serialize_detail(complaint: Complaint) -> ComplaintDetail:

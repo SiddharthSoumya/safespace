@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import hmac
+
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from backend.core.config import get_settings
@@ -31,13 +34,19 @@ router = APIRouter()
 settings = get_settings()
 
 
-def require_admin(x_admin_token: str | None = Header(default=None)) -> None:
-    if x_admin_token != settings.admin_token:
+def require_admin(
+    x_admin_token: str | None = Header(default=None),
+) -> None:
+    if x_admin_token is None or not hmac.compare_digest(
+        x_admin_token.encode("utf-8"),
+        settings.admin_token.encode("utf-8"),
+    ):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid admin token")
 
 
 @router.get("/health")
-def health_check() -> dict[str, str]:
+def health_check(db: Session = Depends(get_db)) -> dict[str, str]:
+    db.execute(select(1))
     return {"status": "ok", "app": settings.app_name}
 
 
